@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HabitFlow — Grow Together</title>
+  <style>
+    :root {
+      --green: #557c63;
+      --green-dark: #304d3b;
+      --green-soft: #e5eee5;
+      --cream: #f7f7f1;
+      --white: #fff;
+      --text: #26352b;
+      --muted: #7d887f;
+      --line: #e9ece6;
+      --lavender: #ebe8ff;
+      --shadow: 0 10px 30px rgba(45, 70, 52, .07);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--cream); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 240px minmax(0, 1fr); }
+    aside { background: #fff; border-right: 1px solid var(--line); padding: 28px 18px; display: flex; flex-direction: column; gap: 28px; }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 10px; font-size: 22px; font-weight: 800; letter-spacing: -.7px; }
+    .brand-mark { width: 36px; height: 36px; border-radius: 12px; background: var(--green); color: white; display: grid; place-items: center; }
+    .nav { display: grid; gap: 8px; }
+    .nav button { border: 0; background: transparent; text-align: left; padding: 13px 14px; border-radius: 13px; color: var(--muted); font-weight: 650; display: flex; align-items: center; gap: 12px; }
+    .nav button.active, .nav button:hover { color: var(--green-dark); background: var(--green-soft); }
+    .nav .icon { width: 22px; text-align: center; font-size: 18px; }
+    .sidebar-note { margin-top: auto; padding: 18px; border-radius: 18px; background: linear-gradient(140deg, #edf4e9, #f0edff); }
+    .sidebar-note strong { display: block; margin-bottom: 7px; }
+    .sidebar-note p { font-size: 13px; line-height: 1.5; color: #66746a; margin: 0; }
+    main { min-width: 0; padding: 28px clamp(18px, 4vw, 52px) 40px; max-width: 1500px; width: 100%; margin: auto; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 28px; }
+    .eyebrow { color: var(--green); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; }
+    h1 { font-size: clamp(27px, 3vw, 36px); margin: 6px 0 0; letter-spacing: -1.2px; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .date-pill, .avatar { background: white; border: 1px solid var(--line); border-radius: 14px; padding: 10px 13px; }
+    .avatar { width: 44px; height: 44px; border-radius: 50%; padding: 0; display: grid; place-items: center; background: #e8efe3; font-size: 22px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .hero { display: grid; grid-template-columns: 1.4fr .8fr; gap: 18px; margin-bottom: 22px; }
+    .hero-card { border-radius: 24px; padding: 25px; background: linear-gradient(120deg, #e4eee2, #f1efff); min-height: 175px; display: flex; align-items: center; justify-content: space-between; gap: 20px; overflow: hidden; }
+    .hero-card h2 { margin: 8px 0; font-size: clamp(21px, 2.3vw, 28px); letter-spacing: -.8px; }
+    .hero-card p { margin: 0; color: #68756b; line-height: 1.55; max-width: 390px; }
+    .hero-emoji { font-size: clamp(48px, 6vw, 78px); filter: drop-shadow(0 8px 8px #b6c7b0); }
+    .stat-card { background: white; border: 1px solid var(--line); border-radius: 24px; padding: 24px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 18px; }
+    .ring { --progress: 50%; width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto; background: conic-gradient(var(--green) var(--progress), #e8eee6 0); position: relative; }
+    .ring::before { content: ""; position: absolute; inset: 8px; background: white; border-radius: 50%; }
+    .ring strong { position: relative; font-size: 20px; }
+    .stat-card h3 { margin: 0 0 5px; font-size: 17px; }
+    .stat-card p { margin: 0; font-size: 13px; color: var(--muted); }
+    .section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 25px 0 14px; }
+    .section-head h2 { margin: 0; font-size: 21px; letter-spacing: -.5px; }
+    .subtle { color: var(--muted); font-size: 13px; }
+    .btn { border: 0; border-radius: 13px; background: var(--green); color: white; font-weight: 750; padding: 12px 16px; box-shadow: 0 5px 12px rgba(85,124,99,.14); }
+    .btn:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .btn.secondary { background: white; color: var(--green-dark); border: 1px solid var(--line); box-shadow: none; }
+    .habits-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .habit-card { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow); transition: .2s ease; }
+    .habit-card:hover { transform: translateY(-2px); }
+    .habit-icon { width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; font-size: 23px; background: var(--green-soft); flex: 0 0 auto; }
+    .habit-main { min-width: 0; flex: 1; }
+    .habit-main h3 { margin: 0 0 5px; font-size: 16px; }
+    .habit-meta { color: var(--muted); font-size: 12px; }
+    .streak { margin-top: 8px; font-size: 12px; color: #b36b4a; font-weight: 750; }
+    .check { width: 34px; height: 34px; border: 2px solid #d9e2d8; border-radius: 50%; background: white; color: white; font-size: 17px; flex: 0 0 auto; }
+    .check.done { background: var(--green); border-color: var(--green); }
+    .chart-card, .panel { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+    .bars { height: 150px; display: flex; align-items: end; gap: clamp(12px, 3vw, 30px); padding: 15px 8px 0; border-bottom: 1px solid var(--line); }
+    .bar-wrap { height: 100%; flex: 1; display: flex; flex-direction: column; justify-content: end; align-items: center; gap: 9px; }
+    .bar { width: min(30px, 75%); min-height: 5px; border-radius: 10px 10px 3px 3px; background: linear-gradient(180deg, #9eafea, #7a78dc); transition: height .3s; }
+    .bar-label { color: var(--muted); font-size: 12px; }
+    .two-col { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; }
+    .quote { background: #f0efff; border-radius: 17px; padding: 19px; color: #4d4a73; line-height: 1.6; }
+    .quote small { display: block; margin-top: 9px; color: #7c78a5; }
+    .feed { display: grid; gap: 16px; }
+    .post { background: white; border: 1px solid var(--line); border-radius: 22px; padding: 20px; box-shadow: var(--shadow); }
+    .post-head { display: flex; align-items: center; gap: 11px; }
+    .person-avatar { width: 43px; height: 43px; display: grid; place-items: center; border-radius: 50%; background: #e6eee3; font-size: 22px; }
+    .person-name { font-weight: 800; }
+    .person-handle { color: var(--muted); font-size: 12px; margin-top: 3px; }
+    .post-time { margin-left: auto; color: var(--muted); font-size: 12px; }
+    .post h3 { margin: 18px 0 7px; font-size: 17px; }
+    .post p { color: #5f6d62; line-height: 1.55; margin: 0 0 15px; }
+    .shared-habit { border-left: 4px solid #9c8de8; background: #faf9ff; padding: 15px; border-radius: 0 15px 15px 0; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .shared-habit strong { display: block; margin-bottom: 5px; }
+    .shared-habit small { color: var(--muted); }
+    .post-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .action-btn { border: 1px solid var(--line); background: white; border-radius: 12px; padding: 9px 13px; color: var(--text); }
+    .action-btn.liked { color: #d65b70; background: #fff0f2; border-color: #f5d6dc; }
+    .friend-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .friend-row:last-child { border-bottom: 0; }
+    .friend-row .details { flex: 1; }
+    .friend-row strong { display: block; font-size: 14px; }
+    .friend-row small { color: var(--muted); display: block; margin-top: 4px; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #61a879; margin-right: 5px; }
+    .field { width: 100%; border: 1px solid #dfe5dd; background: white; border-radius: 12px; padding: 12px 13px; outline: none; margin: 7px 0 12px; }
+    .field:focus { border-color: var(--green); box-shadow: 0 0 0 3px #557c631c; }
+    label { font-weight: 700; font-size: 13px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .empty { padding: 30px; text-align: center; color: var(--muted); }
+    .diary-entry { background: #fff; border: 1px solid var(--line); padding: 20px; border-radius: 18px; margin-top: 14px; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px); background: #263d2e; color: white; padding: 12px 18px; border-radius: 12px; opacity: 0; pointer-events: none; transition: .25s; z-index: 10; box-shadow: var(--shadow); }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(22,34,25,.4); display: none; align-items: center; justify-content: center; padding: 18px; z-index: 20; }
+    .modal-backdrop.show { display: flex; }
+    .modal { width: min(460px, 100%); background: white; padding: 24px; border-radius: 22px; box-shadow: 0 20px 70px #0002; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .modal-head h2 { margin: 0; }
+    .close { border: 0; background: #f1f3ef; border-radius: 50%; width: 34px; height: 34px; font-size: 19px; }
+    .mobile-nav { display: none; }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 82px minmax(0, 1fr); }
+      aside { padding: 22px 10px; align-items: center; }
+      .brand { padding: 0; }
+      .brand-name, .nav-label, .sidebar-note { display: none; }
+      .nav { width: 100%; }
+      .nav button { justify-content: center; padding: 13px 6px; }
+      .hero { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 620px) {
+      .app { display: block; padding-bottom: 74px; }
+      aside { display: none; }
+      main { padding: 20px 15px 28px; }
+      .topbar { align-items: flex-start; }
+      .date-pill { display: none; }
+      .hero-card { padding: 20px; min-height: 150px; }
+      .stat-card { padding: 18px; }
+      .habits-grid, .form-grid { grid-template-columns: 1fr; }
+      .habit-card { padding: 15px; }
+      .mobile-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,.96); border-top: 1px solid var(--line); padding: 8px 6px calc(8px + env(safe-area-inset-bottom)); justify-content: space-around; z-index: 8; backdrop-filter: blur(12px); }
+      .mobile-nav button { border: 0; background: transparent; color: #9aa39b; display: grid; gap: 3px; justify-items: center; font-size: 10px; padding: 5px 8px; }
+      .mobile-nav button span { font-size: 20px; }
+      .mobile-nav button.active { color: var(--green); }
+      .post { padding: 16px; }
+      .shared-habit { align-items: flex-start; }
+    }
+  </style>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><span class="brand-mark">🌱</span><span class="brand-name">HabitFlow</span></div>
+    <nav class="nav" aria-label="Main navigation">
+      <button class="active" data-page="home"><span class="icon">⌂</span><span class="nav-label">My Habits</span></button>
+      <button data-page="social"><span class="icon">♧</span><span class="nav-label">Social</span></button>
+      <button data-page="diary"><span class="icon">▤</span><span class="nav-label">My Diary</span></button>
+      <button data-page="progress"><span class="icon">▥</span><span class="nav-label">Progress</span></button>
+      <button data-page="friends"><span class="icon">♙</span><span class="nav-label">Friends</span></button>
+    </nav>
+    <div class="sidebar-note"><strong>🌿 Grow at your pace</strong><p>You don't need a perfect day. Just one small step forward.</p></div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div><div class="eyebrow">Your personal growth space</div><h1 id="pageTitle">My Habits 🌿</h1></div>
+      <div class="top-actions"><div class="date-pill" id="todayDate"></div><button class="avatar" title="Your profile">🌷</button></div>
+    </header>
+
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <div class="hero-card"><div><div class="eyebrow">A fresh start, every day</div><h2 id="greeting">Good day, Chiku! ✨</h2><p>Small habits become beautiful changes. Let's make today count.</p></div><div class="hero-emoji">🌱</div></div>
+        <div class="stat-card"><div class="ring" id="progressRing"><strong id="progressNumber">0%</strong></div><div><h3>Today's progress</h3><p id="progressCaption">0 of 4 habits completed</p><p style="margin-top:8px">One step at a time 💚</p></div></div>
+      </div>
+      <div class="section-head"><div><h2>Today's habits</h2><div class="subtle">Build consistency, not perfection.</div></div><button class="btn" id="addHabitBtn">＋ Add habit</button></div>
+      <div class="habits-grid" id="habitsGrid"></div>
+      <div class="two-col" style="margin-top:22px">
+        <div class="chart-card"><div class="section-head" style="margin-top:0"><div><h2>This week</h2><div class="subtle">Your completed habits</div></div><span>📈</span></div><div class="bars" id="weeklyBars"></div></div>
+        <div class="panel"><h2 style="margin:0 0 14px">A little reminder 💚</h2><div class="quote">“You don't have to be perfect. You just have to keep showing up.”<small>— Your daily encouragement</small></div></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-social">
+      <div class="hero-card" style="margin-bottom:22px"><div><div class="eyebrow">Your circle, your choice</div><h2>Grow together 🤝</h2><p>See the habits and milestones your friends choose to share. No public feed, just your circle.</p></div><div class="hero-emoji">💚</div></div>
+      <div class="section-head"><div><h2>Friends activity</h2><div class="subtle">Motivation from people you know</div></div><button class="btn" id="socialAddFriend">＋ Add friend</button></div>
+      <div class="feed" id="feed"></div>
+      <p class="subtle" style="margin-top:15px">Demo content only. Real friend connections require accounts and a secure backend.</p>
+    </section>
+
+    <section class="page" id="page-diary">
+      <div class="hero-card" style="margin-bottom:22px"><div><div class="eyebrow">A private space for you</div><h2>Your little corner of the world 📔</h2><p>Write freely, reflect on your day, and keep your thoughts for yourself.</p></div><div class="hero-emoji">🪴</div></div>
+      <div class="panel"><label for="diaryTitle">Entry title</label><input class="field" id="diaryTitle" placeholder="A little note about today..." /><label for="diaryMood">How are you feeling?</label><select class="field" id="diaryMood"><option>😊 Happy</option><option>😌 Calm</option><option>🤩 Amazing</option><option>😐 Neutral</option><option>😔 Sad</option><option>😣 Stressed</option></select><label for="diaryText">Dear diary...</label><textarea class="field" id="diaryText" rows="7" placeholder="Write your thoughts here..."></textarea><button class="btn" id="saveDiary">Save private entry</button><p class="subtle">This demo saves entries in this browser only. It is not encrypted.</p></div>
+      <div class="section-head"><h2>Previous entries</h2><span class="subtle">Stored on this device</span></div><div id="diaryEntries"></div>
+    </section>
+
+    <section class="page" id="page-progress">
+      <div class="hero-card" style="margin-bottom:22px"><div><div class="eyebrow">Your journey so far</div><h2>Progress, not perfection 📈</h2><p>Celebrate the effort you put in, one day at a time.</p></div><div class="hero-emoji">🏆</div></div>
+      <div class="two-col"><div class="panel"><h2>Habit summary</h2><div id="progressSummary"></div></div><div class="panel"><h2>Keep going 🌱</h2><div class="quote">Consistency isn't about never missing a day. It's about returning to what matters to you.</div></div></div>
+    </section>
+
+    <section class="page" id="page-friends">
+      <div class="hero-card" style="margin-bottom:22px"><div><div class="eyebrow">Private by design</div><h2>Your circle 👥</h2><p>Add friends using their unique ID. Only accepted friends should see shared content.</p></div><div class="hero-emoji">🫶</div></div>
+      <div class="panel"><div class="section-head" style="margin-top:0"><div><h2>Add a friend</h2><div class="subtle">Enter a friend's HabitFlow ID</div></div></div><label for="friendId">Friend ID</label><input class="field" id="friendId" placeholder="e.g. HF-7K29PX" /><button class="btn" id="sendRequest">Send friend request</button><div id="requestResult" class="subtle" style="margin-top:12px"></div></div>
+      <div class="panel" style="margin-top:18px"><h2>Your friends</h2><div id="friendsList"></div><p class="subtle">This frontend demo simulates requests locally; it does not contact real users.</p></div>
+    </section>
+  </main>
+</div>
+
+<nav class="mobile-nav" aria-label="Mobile navigation">
+  <button class="active" data-page="home"><span>⌂</span>Habits</button>
+  <button data-page="social"><span>♧</span>Social</button>
+  <button data-page="diary"><span>▤</span>Diary</button>
+  <button data-page="progress"><span>▥</span>Progress</button>
+  <button data-page="friends"><span>♙</span>Friends</button>
+</nav>
+
+<div class="modal-backdrop" id="habitModal">
+  <div class="modal">
+    <div class="modal-head"><h2>Add a habit 🌱</h2><button class="close" id="closeModal" aria-label="Close">×</button></div>
+    <form id="habitForm">
+      <label for="habitName">Habit name</label><input class="field" id="habitName" required maxlength="60" placeholder="e.g. Practise Java" />
+      <div class="form-grid"><div><label for="habitIcon">Choose an icon</label><select class="field" id="habitIcon"><option>📚</option><option>💻</option><option>💧</option><option>🧘</option><option>🏃</option><option>✍️</option><option>🌙</option><option>🎯</option></select></div><div><label for="habitTarget">Daily target</label><input class="field" id="habitTarget" maxlength="35" placeholder="20 minutes" /></div></div>
+      <button class="btn" type="submit" style="width:100%">Create habit</button>
+    </form>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  const todayKey = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  };
+  const dateText = new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'short', day: 'numeric' }).format(new Date());
+  document.getElementById('todayDate').textContent = dateText;
+  const hour = new Date().getHours();
+  document.getElementById('greeting').textContent = `${hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'}, Chiku! ✨`;
+
+  const defaultHabits = [
+    {id: 1, name: 'Study DSA in Java', icon: '💻', target: '30 minutes', streak: 6, completed: false, history: {}},
+    {id: 2, name: 'Read a book', icon: '📚', target: '20 minutes', streak: 4, completed: true, history: {}},
+    {id: 3, name: 'Drink water', icon: '💧', target: '8 glasses', streak: 9, completed: false, history: {}},
+    {id: 4, name: 'Journal & reflect', icon: '✍️', target: '10 minutes', streak: 3, completed: false, history: {}}
+  ];
+  let habits;
+  try { habits = JSON.parse(localStorage.getItem('hf_habits') || 'null') || defaultHabits; } catch { habits = defaultHabits; }
+  habits.forEach(h => { h.history = h.history || {}; h.completed = !!h.history[todayKey()]; });
+  const saveHabits = () => localStorage.setItem('hf_habits', JSON.stringify(habits));
+  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message; toast.classList.add('show');
+    clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+  function renderHabits() {
+    const grid = document.getElementById('habitsGrid');
+    if (!habits.length) { grid.innerHTML = '<div class="empty">No habits yet. Add your first one 🌱</div>'; }
+    else grid.innerHTML = habits.map(h => `<article class="habit-card">
+      <div class="habit-icon">${escapeHtml(h.icon)}</div><div class="habit-main"><h3>${escapeHtml(h.name)}</h3><div class="habit-meta">${escapeHtml(h.target || 'Daily goal')}</div><div class="streak">🔥 ${h.streak || 0} day streak</div></div>
+      <button class="check ${h.completed ? 'done' : ''}" data-toggle="${h.id}" aria-label="${h.completed ? 'Mark incomplete' : 'Mark complete'}">${h.completed ? '✓' : ''}</button>
+    </article>`).join('');
+    grid.querySelectorAll('[data-toggle]').forEach(btn => btn.addEventListener('click', () => {
+      const h = habits.find(x => String(x.id) === btn.dataset.toggle);
+      if (!h) return;
+      h.completed = !h.completed;
+      h.history[todayKey()] = h.completed;
+      if (h.completed) h.streak = (h.streak || 0) + 1;
+      else h.streak = Math.max(0, (h.streak || 0) - 1);
+      saveHabits(); renderHabits(); renderProgress(); renderBars();
+      showToast(h.completed ? 'Habit completed — well done! 🌱' : 'Habit marked incomplete');
+    }));
+    renderProgress();
+  }
+  function renderProgress() {
+    const completed = habits.filter(h => h.completed).length;
+    const pct = habits.length ? Math.round(completed / habits.length * 100) : 0;
+    document.getElementById('progressRing').style.setProperty('--progress', pct + '%');
+    document.getElementById('progressNumber').textContent = pct + '%';
+    document.getElementById('progressCaption').textContent = `${completed} of ${habits.length} habits completed`;
+    document.getElementById('progressSummary').innerHTML = `<p><strong>${completed}</strong> habits completed today</p><p><strong>${habits.length - completed}</strong> habits left for today</p><p><strong>${habits.reduce((n,h)=>n+(h.streak||0),0)}</strong> combined streak-day count (demo)</p>`;
+  }
+  function renderBars() {
+    const bars = document.getElementById('weeklyBars');
+    const labels = ['M','T','W','T','F','S','S'];
+    const values = [40, 70, 35, 90, 60, 75, habits.length ? Math.round(habits.filter(h=>h.completed).length/habits.length*100) : 0];
+    bars.innerHTML = values.map((v,i)=>`<div class="bar-wrap"><div class="bar" style="height:${Math.max(v,4)}%"></div><span class="bar-label">${labels[i]}</span></div>`).join('');
+  }
+  const samplePosts = [
+    {name:'Ananya Sharma', handle:'@ananya.reads', avatar:'📚', time:'Today', title:'A little reading win!', text:'Finished my reading goal today. Showing up for 20 minutes is becoming a lovely routine.', habit:'Read for 20 minutes', streak:7, likes:4},
+    {name:'Rahul Verma', handle:'@rahul.codes', avatar:'💻', time:'Today', title:'Coding, one day at a time', text:'Solved a DSA problem and kept my promise to practise. Small progress still counts!', habit:'Java DSA practice', streak:12, likes:8}
+  ];
+  let likedPosts = JSON.parse(localStorage.getItem('hf_likes') || '[]');
+  function renderFeed() {
+    document.getElementById('feed').innerHTML = samplePosts.map((p,i)=>`<article class="post">
+      <div class="post-head"><div class="person-avatar">${p.avatar}</div><div><div class="person-name">${p.name}</div><div class="person-handle">${p.handle} · ${p.time}</div></div><span class="post-time">Friends</span></div>
+      <h3>${p.title}</h3><p>${p.text}</p>
+      <div class="shared-habit"><div><strong>🌱 ${p.habit}</strong><small>Shared habit · 🔥 ${p.streak}-day streak</small></div><span style="font-size:25px">🏆</span></div>
+      <div class="post-actions"><button class="action-btn ${likedPosts.includes(i)?'liked':''}" data-like="${i}">${likedPosts.includes(i)?'♥ Liked':'♡ Like'} · ${p.likes + (likedPosts.includes(i)?1:0)}</button><button class="action-btn" data-comment="${i}">💬 Comment</button></div>
+    </article>`).join('');
+    document.querySelectorAll('[data-like]').forEach(b=>b.addEventListener('click',()=>{
+      const i=Number(b.dataset.like); likedPosts=likedPosts.includes(i)?likedPosts.filter(x=>x!==i):[...likedPosts,i];
+      localStorage.setItem('hf_likes',JSON.stringify(likedPosts)); renderFeed();
+    }));
+    document.querySelectorAll('[data-comment]').forEach(b=>b.addEventListener('click',()=>showToast('Comments can be connected to a backend in the next version 💬')));
+  }
+  function renderFriends() {
+    const friends = JSON.parse(localStorage.getItem('hf_friends') || '[]');
+    document.getElementById('friendsList').innerHTML = friends.length ? friends.map(f=>`<div class="friend-row"><div class="person-avatar">🌱</div><div class="details"><strong>${escapeHtml(f.id)}</strong><small>Request sent · awaiting acceptance</small></div></div>`).join('') : '<div class="empty">No friends added yet. Add someone you know using their ID.</div>';
+  }
+  document.getElementById('sendRequest').addEventListener('click',()=>{
+    const input=document.getElementById('friendId'), id=input.value.trim().toUpperCase();
+    if(!id){showToast('Enter a friend ID first');return;}
+    if(!/^HF-[A-Z0-9]{4,12}$/.test(id)){showToast('Use an ID format like HF-7K29PX');return;}
+    const friends=JSON.parse(localStorage.getItem('hf_friends')||'[]');
+    if(friends.some(f=>f.id===id)){showToast('Request already exists');return;}
+    friends.push({id}); localStorage.setItem('hf_friends',JSON.stringify(friends));
+    document.getElementById('requestResult').textContent=`Demo request created for ${id}. Real requests need accounts and a backend.`;
+    input.value='';renderFriends();showToast('Demo friend request created 🤝');
+  });
+  document.getElementById('socialAddFriend').addEventListener('click',()=>navigate('friends'));
+  function navigate(page) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===`page-${page}`));
+    document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+    const titles={home:'My Habits 🌿',social:'Friends Activity 🤝',diary:'My Diary 📔',progress:'My Progress 📈',friends:'Your Circle 👥'};
+    document.getElementById('pageTitle').textContent=titles[page]||'HabitFlow';
+    if(page==='social')renderFeed(); if(page==='friends')renderFriends();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.page)));
+  const modal=document.getElementById('habitModal');
+  document.getElementById('addHabitBtn').addEventListener('click',()=>{modal.classList.add('show');document.getElementById('habitName').focus();});
+  document.getElementById('closeModal').addEventListener('click',()=>modal.classList.remove('show'));
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show');});
+  document.getElementById('habitForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const name=document.getElementById('habitName').value.trim();
+    if(!name)return;
+    habits.push({id:Date.now(),name,icon:document.getElementById('habitIcon').value,target:document.getElementById('habitTarget').value.trim()||'Daily goal',streak:0,completed:false,history:{}});
+    saveHabits();renderHabits();renderBars();e.target.reset();modal.classList.remove('show');showToast('Your new habit is ready 🌱');
+  });
+  function renderDiary() {
+    const entries=JSON.parse(localStorage.getItem('hf_diary')||'[]');
+    document.getElementById('diaryEntries').innerHTML=entries.length?entries.slice().reverse().map(e=>`<article class="diary-entry"><div class="subtle">${escapeHtml(e.date)} · ${escapeHtml(e.mood)}</div><h3>${escapeHtml(e.title||'Untitled entry')}</h3><p style="white-space:pre-wrap">${escapeHtml(e.text)}</p><button class="action-btn" data-delete-entry="${e.id}">Delete entry</button></article>`).join(''):'<div class="empty">Your diary is waiting for its first page 🌷</div>';
+    document.querySelectorAll('[data-delete-entry]').forEach(b=>b.addEventListener('click',()=>{if(!confirm('Delete this diary entry?'))return;const entries=JSON.parse(localStorage.getItem('hf_diary')||'[]').filter(e=>String(e.id)!==b.dataset.deleteEntry);localStorage.setItem('hf_diary',JSON.stringify(entries));renderDiary();showToast('Entry deleted');}));
+  }
+  document.getElementById('saveDiary').addEventListener('click',()=>{
+    const text=document.getElementById('diaryText').value.trim();
+    if(!text){showToast('Write a little something first');return;}
+    const entries=JSON.parse(localStorage.getItem('hf_diary')||'[]');
+    entries.push({id:Date.now(),date:todayKey(),title:document.getElementById('diaryTitle').value.trim(),mood:document.getElementById('diaryMood').value,text});
+    localStorage.setItem('hf_diary',JSON.stringify(entries));
+    document.getElementById('diaryTitle').value='';document.getElementById('diaryText').value='';renderDiary();showToast('Private diary entry saved 📔');
+  });
+  renderHabits();renderBars();renderFeed();renderDiary();renderFriends();
+</script>
+<script src="script.js"></script>
+</body>
+</html>
+
